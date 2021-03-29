@@ -1,11 +1,3 @@
 <resources>
-    <string name="app_name">smartpad_demo</string>
-
-    <string name="iot_start">Start</string>
-    <string name="iot_reset">Reset</string>
-    <string name="iot_get_log_file">Get Log</string>
-    <string name="iot_bind_token">Bind Token</string>
-
-    <string name="iot_reboot">reboot</string>
-    <string name="iot_upgrade">upgrade</string>
+    <string name="app_name">gateway_sdk</string>
 </resources>

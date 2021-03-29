@@ -9,7 +9,7 @@ Tuya安卓设备端网关SDK是一套融合了网关、日志系统、语音功�
 
 
 ## 如何使用
-[接入文档地址](https://github.com/TuyaInc/tuyasmart_android_device_central_sdk/blob/stable/README.md)
+[接入文档地址](https://developer.tuya.com/cn/docs/iot/smart-product-solution/product-solutiongateway/gateway-extension-sdk-access-solution/tuya-gateway-extension-sdk-development-manual?id=K9dudnkt0lnx4)
 
 
 ## 如何获得技术支持
