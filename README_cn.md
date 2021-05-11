@@ -15,13 +15,13 @@ Tuya安卓设备端网关联网SDK，借助网关设备的联网能力，直接�
 
 1. 配置 build.gradle 文件 app 的 build.gradle 文件dependencies 里添加依赖库。
 
-    implementation 'com.tuya.smart:tuyasmart-gw_networking_sdk:1.0.6'
+    implementation 'com.tuya.smart:tuyasmart-gw_networking_sdk:1.0.9'
 
     implementation 'pub.devrel:easypermissions:2.0.1'
 
 2. 根目录下 build.gradle 文件添加源:
 
-    maven { url 'https://dl.bintray.com/tuyasmartai/sdk' }
+    maven { url "https://maven-other.tuya.com/repository/maven-releases/" }
 
 ## 网关控制
 
