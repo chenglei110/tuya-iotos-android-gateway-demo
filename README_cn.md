@@ -14,12 +14,13 @@ Tuya安卓设备端网关SDK是一套融合了网关、日志系统、语音功�
 ## 集成SDK
 1. 配置 build.gradle 文件 app 的 build.gradle 文件dependencies 里添加依赖库。
 
-    implementation 'com.tuya.smart:tuyasmart-gw_extension_sdk:1.0.4'
+    implementation 'com.tuya.smart:tuyasmart-gw_extension_sdk:1.0.6'
 
     implementation 'pub.devrel:easypermissions:2.0.1'
+    
 2. 根目录下 build.gradle 文件添加源:
 
-    maven { url 'https://dl.bintray.com/tuyasmartai/sdk' }
+    maven { url "https://maven-other.tuya.com/repository/maven-releases/" }
 
 
 ## 网关控制
