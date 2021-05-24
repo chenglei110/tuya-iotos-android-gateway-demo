@@ -10,10 +10,12 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import com.tuya.smart.gateway.gw_networking_sdk.ChCode;
 import com.tuya.smart.gateway.gw_networking_sdk.DPEvent;
+import com.tuya.smart.gateway.gw_networking_sdk.DPQuery;
 import com.tuya.smart.gateway.gw_networking_sdk.DevDescIf;
 import com.tuya.smart.gateway.gw_networking_sdk.GwAttachAttr;
 import com.tuya.smart.gateway.gw_networking_sdk.IoTAppCallbacks;
 import com.tuya.smart.gateway.gw_networking_sdk.IoTCallbacks;
+import com.tuya.smart.gateway.gw_networking_sdk.IoTDoorLockCallbacks;
 import com.tuya.smart.gateway.gw_networking_sdk.IoTGatewaySDKManager;
 import com.tuya.smart.gateway.gw_networking_sdk.IoTGwCallbacks;
 import com.tuya.smart.gateway.gw_networking_sdk.Log;
@@ -51,6 +53,8 @@ public class MainActivity extends AppCompatActivity implements EasyPermissions.P
         findViewById(R.id.update_subdevice_onoffline_status).setOnClickListener(this::onClick);
 
         findViewById(R.id.traversal_device).setOnClickListener(this::onClick);
+
+        findViewById(R.id.droorlock_test).setOnClickListener(this::onClick);
 
         if (!EasyPermissions.hasPermissions(this, requiredPermissions)) {
             EasyPermissions.requestPermissions(this, "need auth for using this device", PERMISSION_CODE, requiredPermissions);
@@ -171,6 +175,11 @@ public class MainActivity extends AppCompatActivity implements EasyPermissions.P
 
             @Override
             public void onDpQuery(DPEvent event) {
+
+            }
+
+            @Override
+            public void onDpQuery(DPQuery[] dpQueries) {
 
             }
 
@@ -359,6 +368,18 @@ public class MainActivity extends AppCompatActivity implements EasyPermissions.P
 
         ioTGatewaySDKManager.setIoTAppCallbacks(ioTAppCallbacks);
 
+        // 门锁相关回调注册
+        IoTDoorLockCallbacks ioTDoorLockCallbacks = new IoTDoorLockCallbacks() {
+            @Override
+            public int onZigbeeDataSend(String addr, byte[] data, int cluster_id, int command_id) {
+                Log.d(TAG, "onZigbeeDataSend called addr " + addr + " data.len: " + data.length + " cluid: " + cluster_id + " cmdid: " + command_id);
+                // USER TODO:
+                return 0;
+            }
+        };
+
+        ioTGatewaySDKManager.setIoTDoorLockCallbacks(ioTDoorLockCallbacks);
+
         return 0;
     }
 
@@ -457,6 +478,47 @@ public class MainActivity extends AppCompatActivity implements EasyPermissions.P
                 }
                 break;
             }
+
+            case R.id.droorlock_test:
+                Log.d(TAG, "droorlock_test start" );
+                int ret1 = 0;
+                byte [] netWork_key = {22,        82,        11};
+//                ret1 = ioTGatewaySDKManager.IotDoorLockInit(12, netWork_key, true);
+//                Log.d(TAG, "droorlock_test IotDoorLockInit ret:  " + ret1);
+//
+//                ret1 = ioTGatewaySDKManager.IotDoorLockTypeGet("hello cl", "ok");
+//                Log.d(TAG, "droorlock_test IotDoorLockTypeGet ret:  " + ret1);
+//
+//                ioTGatewaySDKManager.IotDoorLockNetstatNotify(false);
+//
+//                ret1 = ioTGatewaySDKManager.IotDoorLockAdd("12:34:56:78:90", 17);
+//                Log.d(TAG, "droorlock_test IotDoorLockAdd ret:  " + ret1);
+//
+//                ret1 =  ioTGatewaySDKManager.IotDoorLockDel("12:34:56:78:90");
+//                Log.d(TAG, "droorlock_test IotDoorLockDel ret:  " + ret1);
+//
+//                RecvRawDP rawDP = new RecvRawDP(12, 34, "56", 78, "90", netWork_key);
+//
+//                ret1 = ioTGatewaySDKManager.IotDoorLockDataSend("12:34:56:78:90", 17, rawDP);
+//                Log.d(TAG, "droorlock_test  IotDoorLockDataSend ret:  " + ret1);
+//
+//                DPEvent event4 = new DPEvent(1, (byte) DPEvent.Type.PROP_BOOL, true, timestamp);
+//                DPEvent event5 = new DPEvent(102, (byte) DPEvent.Type.PROP_VALUE, 12, timestamp);
+//                DPEvent event6 = new DPEvent(105, (byte) DPEvent.Type.PROP_RAW, "test".getBytes(Charset.forName("UTF-8")), timestamp);
+//                DPEvent[] events1 = {event4, event5, event6};
+//                RecvObjDP recvObjDP = new RecvObjDP(12, 34, "56", "78", events1);
+//
+//                ret1 =  ioTGatewaySDKManager.IotDoorLockDataSend("12:34:56:78:90", 17, recvObjDP);
+//                Log.d(TAG, "droorlock_test IotDoorLockDataSend ret:  " + ret1);
+//
+//                ret1 =  ioTGatewaySDKManager.IotDoorLockDataReport("12:34:56:78:90", 17, netWork_key, 12, 34);
+//                Log.d(TAG, "droorlock_test IotDoorLockDataReport ret:  " + ret1);
+
+                DPQuery dpQuery = new DPQuery("12", netWork_key);
+                ret1 = ioTGatewaySDKManager.IotDoorLockDataQuery("12:34:56:78:90", 17, dpQuery);
+                Log.d(TAG, "droorlock_test IotDoorLockDataQuery ret:  " + ret1);
+
+                Log.d(TAG, "droorlock_test end ");
         }
     }
 }

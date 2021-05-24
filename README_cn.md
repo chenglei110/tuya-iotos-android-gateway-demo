@@ -15,7 +15,7 @@ Tuya安卓设备端网关联网SDK，借助网关设备的联网能力，直接�
 
 1. 配置 build.gradle 文件 app 的 build.gradle 文件dependencies 里添加依赖库。
 
-    implementation 'com.tuya.smart:tuyasmart-gw_networking_sdk:1.0.9'
+    implementation 'com.tuya.smart:tuyasmart-gw_networking_sdk:1.0.9-doorlock-1.0.0'
 
     implementation 'pub.devrel:easypermissions:2.0.1'
 
@@ -124,7 +124,12 @@ IoTGwCallbacks ioTGwCallbacks = new IoTGwCallbacks() {
             }
 
             @Override
-            public void onDpQuery(DPEvent event) {
+            public void onDpQuery(DPEvent event) { // 待废弃
+            
+            }
+
+            @Override
+            public void onDpQuery(DPQuery[] queries) {
 
             }
 
@@ -298,6 +303,21 @@ IoTGwCallbacks ioTGwCallbacks = new IoTGwCallbacks() {
         };
 
         ioTGatewaySDKManager.setIoTAppCallbacks(ioTAppCallbacks);
+
+
+        // 门锁相关回调注册
+        IoTDoorLockCallbacks ioTDoorLockCallbacks = new IoTDoorLockCallbacks() {
+            @Override
+            public int onZigbeeDataSend(String addr, byte[] data, int cluster_id, int command_id) {
+                Log.d(TAG, "onZigbeeDataSend called addr " + addr + " data.len: " + data.length + " cluid: " + cluster_id + " cmdid: " + command_id);
+                // USER TODO:
+                return 0;
+            }
+        };
+
+        ioTGatewaySDKManager.setIoTDoorLockCallbacks(ioTDoorLockCallbacks);
+
+
 ```
 
 #### 网关参数配置
@@ -484,6 +504,12 @@ public interface IoTCallbacks {
      @param event 参考DPEvent类说明
      */
     void onDpQuery(DPEvent event);
+
+    /**
+     * dp查询回调
+     @param queries 参考DPQuery类说明
+     */
+    void onDpQuery(DPQuery[] queries);
 
     /**
      * dp事件回调
@@ -692,6 +718,23 @@ public interface IoTAppCallbacks {
     * @return 成功，返回0；失败，非0
     * */
     int onEngrGwScePanel(String dev_id, ScePanel scePanel, int btn_num);
+}
+```
+
+#### 网关门锁回调接口：IoTDoorLockCallbacks
+```java
+public interface IoTDoorLockCallbacks {
+
+    /*
+    * zigbee数据下发回调
+    *
+    * @param addr zigbee设备mac地址
+    * @param data zigbee指令zcl payload
+    * @param cluster_id zigbee指令cluster id
+    * @param command_id zigbee指令command id
+    * */
+    int onZigbeeDataSend(String addr, byte[] data, int cluster_id, int command_id);
+
 }
 ```
 
@@ -1018,6 +1061,133 @@ public int setGwAppLogPath(String path);
 public static DevDescIf IotGateWayDevTraversal();
 ```
 
+#### IotDoorLockInit：初始化整个zigbee门锁管理服务
+```java
+/**
+     * 初始化整个zigbee门锁管理服务，在联网SDK初始化成功之后在调用该接口
+     *
+     * @param pan_id 网关panID
+     * @param netWork_key 网关Key
+     * @param net_stat 网关网络状态
+     *
+     * @return 成功，返回0；失败，返回错误码
+     */
+    public static int IotDoorLockInit(int pan_id, byte[] netWork_key, boolean net_stat);
+```
+
+#### IotDoorLockTypeGet：zigbee门锁类型获取
+```java
+   /**
+     * zigbee门锁类型获取，需要在绑定门锁设备前调用该接口获取门锁类型，以便后续SDK判断需要
+     * 		现仅支持通过model_id查找，manufacturer_name字段可输入为NULL
+     *
+     * @param manufacturer_name zigbee设备厂商号
+     * @param model_id zigbee设备modeid
+     * TRUE:正常连接
+     * FALSE:断开连接
+     *
+     * @return 成功，返回门锁类型；失败，返回错误码
+     *
+     *      TUYA_DOORLOCK_TYPE_COM = 0x1,   //涂鸦门锁类型——通用
+     *      TUYA_DOORLOCK_TYPE_FLATS,      //涂鸦门锁类型——公寓
+     *      TUYA_DOORLOCK_TYPE_FLATS_B,     //涂鸦门锁类型——商用
+      *
+     */
+    public static int IotDoorLockTypeGet(String manufacturer_name, String model_id);
+```
+
+#### IotDoorLockNetstatNotify：zigbee门锁服务器连接状态通知
+```java
+    /**
+     * zigbee门锁服务器连接状态通知，在服务器连接状态变动时，调用该通知接口
+     *
+     * @param stat 服务器连接状态
+     * TRUE:正常连接
+     * FALSE:断开连接
+     *
+     */
+    public static void IotDoorLockNetstatNotify(boolean stat);
+```
+
+#### IotDoorLockAdd：门锁设备添加
+```java
+    /**
+     * 门锁设备添加，在云端绑定返回成功之后，调用该接口
+     *
+     * @param addr zigbee设备mac地址
+     * @param type 门锁类型
+     *
+     * @return 成功，返回0；失败，返回错误码
+     */
+    public static int IotDoorLockAdd(String addr, int type);
+```
+
+#### IotDoorLockDel：门锁设备删除
+```java
+    /**
+     * 在删除设备后调用该接口
+     *
+     * @param addr zigbee设备mac地址
+     * @return 成功，返回0；失败，返回错误码
+     */
+    public static int IotDoorLockDel(String addr);
+```
+
+#### IotDoorLockDataSend：门锁dp下发
+```java
+    /**
+     * 门锁dp下发
+     *
+     * @param addr zigbee设备mac地址
+     * @param type 门锁类型
+     * @param rawDP 门锁dp数据
+     * @return 成功，返回0；失败，返回错误码
+     */
+    public static int IotDoorLockDataSend(String addr, int type, RecvRawDP rawDP);
+```
+
+#### IotDoorLockDataSend：门锁dp下发
+```java
+    /**
+     * 门锁dp下发
+     *
+     * @param addr zigbee设备mac地址
+     * @param type 门锁类型
+     * @param objDP 门锁dp数据
+     * @return 成功，返回0；失败，返回错误码
+     */
+    public static int IotDoorLockDataSend(String addr, int type, RecvObjDP objDP);
+```
+
+#### IotDoorLockDataReport：门锁数据上报
+```java
+    /**
+     * 门锁数据上报，将设备端发送的原始数据内容转发透传
+     *
+     * @param addr zigbee设备mac地址
+     * @param type 门锁类型
+     * @param data ZCL的payload
+     * @param cluster_id zigbee指令Cluster id
+     * @param command_id zigbee指令Command id
+     * @return 成功，返回0；失败，返回错误码
+     */
+    public static int IotDoorLockDataReport(String addr, int type, byte[] data, int cluster_id, int command_id);
+```
+
+#### IotDoorLockDataQuery：门锁dp查询
+```java
+      /**
+     * 门锁dp查询，仅支持查询所有DP
+     *
+     * @param addr zigbee设备mac地址
+     * @param type 门锁类型
+     * @param dp_qry 需要查询的门锁dp
+     * @return 成功，返回0；失败，返回错误码
+     */
+    public static int IotDoorLockDataQuery(String addr, int type, DPQuery dp_qry);
+```
+
+
 ## 辅助类说明
 
 #### DPEvent
@@ -1186,6 +1356,60 @@ public class GwAttachAttr {
 }
 ```
 
+#### DPQuery
+```java
+public class DPQuery {
+
+    public String cid;
+    public byte []dpid;
+    ...
+}
+```
+
+#### RecvObjDP
+```java
+public class RecvObjDP {
+
+    // DP_TRANS_TYPE_T
+    public static final byte DP_CMD_LAN  =    0;       // cmd from LAN
+    public static final byte DP_CMD_MQ    =   1 ;      // cmd from MQTT
+    public static final byte DP_CMD_TIMER =   2;       // cmd from Local Timer
+    public static final byte DP_CMD_SCENE_LINKAGE = 3;  // cmd from scene linkage
+    public static final byte DP_CMD_RELIABLE_TRANSFER = 4; // cmd from reliable transfer
+    public static final byte DP_CMD_BT   =    5;      // cmd from bt
+    public static final byte DP_CMD_SCENE_LINKAGE_LAN = 6;  // cmd from lan scene linkage
+
+    public int cmd_tp;
+    public int dtt_tp;
+    public String cid;
+    public String mb_id;
+    public DPEvent []dpEvent;
+    ...
+}
+```
+
+#### RecvRawDP
+```java
+public class RecvRawDP {
+
+    // DP_TRANS_TYPE_T
+    public static final byte DP_CMD_LAN  =    0;       // cmd from LAN
+    public static final byte DP_CMD_MQ    =   1 ;      // cmd from MQTT
+    public static final byte DP_CMD_TIMER =   2;       // cmd from Local Timer
+    public static final byte DP_CMD_SCENE_LINKAGE = 3;  // cmd from scene linkage
+    public static final byte DP_CMD_RELIABLE_TRANSFER = 4; // cmd from reliable transfer
+    public static final byte DP_CMD_BT   =    5;      // cmd from bt
+    public static final byte DP_CMD_SCENE_LINKAGE_LAN = 6;  // cmd from lan scene linkage
+
+    public int cmd_tp;
+    public int dtt_tp;
+    public String cid;
+    public int dpid;
+    public String mb_id;
+    public byte []data;
+    ...
+}
+```
 
 ## 如何获得技术支持
 You can get support from Tuya with the following methods:
