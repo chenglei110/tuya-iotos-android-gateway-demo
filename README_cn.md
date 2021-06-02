@@ -15,7 +15,7 @@ Tuya安卓设备端网关联网SDK，借助网关设备的联网能力，直接�
 
 1. 配置 build.gradle 文件 app 的 build.gradle 文件dependencies 里添加依赖库。
 
-    implementation 'com.tuya.smart:tuyasmart-gw_networking_sdk:1.0.9-doorlock-1.0.0'
+    implementation 'com.tuya.smart:tuyasmart-gw_networking_sdk:1.0.9-doorlock-1.0.1'
 
     implementation 'pub.devrel:easypermissions:2.0.1'
 
